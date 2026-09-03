@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest) {
   const user = await requireAdminUser();
   if (!user) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
-  const { businessPhone } = await req.json();
+  const { businessPhone, pixKey } = await req.json();
   if (!businessPhone) {
     return NextResponse.json({ error: "Telefone é obrigatório." }, { status: 400 });
   }
@@ -25,7 +25,10 @@ export async function PUT(req: NextRequest) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("settings")
-    .update({ business_phone: String(businessPhone).replace(/\D/g, "") })
+    .update({
+      business_phone: String(businessPhone).replace(/\D/g, ""),
+      pix_key: String(pixKey ?? "").trim(),
+    })
     .eq("id", 1)
     .select()
     .single();

@@ -14,11 +14,12 @@ function flavorName(id: FlavorId): string {
  * pizza grátis (com ou sem itens adicionais pagos).
  */
 export function buildOrderMessage(params: {
-  customer: Pick<PublicCustomer, "block" | "apartment">;
+  customer: Pick<PublicCustomer, "name" | "block" | "apartment">;
+  pixKey?: string;
   items: OrderItem[]; // itens pagos
   rewardFlavor?: FlavorId | null; // preenchido quando é resgate de recompensa
 }): { message: string; total: number } {
-  const { customer, items, rewardFlavor } = params;
+  const { customer, items, rewardFlavor, pixKey } = params;
   const nonZeroItems = items.filter((i) => i.quantity > 0);
   const total = nonZeroItems.reduce((sum, i) => sum + i.quantity * PIZZA_PRICE, 0);
 
@@ -26,6 +27,8 @@ export function buildOrderMessage(params: {
   lines.push("📦 Entrega:");
   lines.push(`Bloco ${customer.block} — Apartamento ${customer.apartment}`);
   lines.push("");
+
+  lines.push(`Cliente: ${customer.name}`);
 
   if (rewardFlavor) {
     lines.push("🎁 Pizza grátis:");
@@ -43,10 +46,35 @@ export function buildOrderMessage(params: {
   lines.push("");
   lines.push(`💰 Total: ${formatMoney(total)}`);
 
+  if (pixKey?.trim()) {
+    lines.push("", `PIX para pagamento: ${pixKey.trim()}`);
+  }
+
   return { message: lines.join("\n"), total };
 }
 
 export function buildWhatsappUrl(phone: string, message: string): string {
   const cleanPhone = phone.replace(/\D/g, "");
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+}
+
+export function buildLoyaltyUpdateMessage(params: {
+  name: string;
+  loyaltyPoints: number;
+  rewardAvailable: boolean;
+  cardUrl: string;
+}): string {
+  const { name, loyaltyPoints, rewardAvailable, cardUrl } = params;
+  const lines = [
+    "Atelier do Pão — Fidelidade",
+    "",
+    `Olá, ${name}!`,
+    "",
+    "Seu cartão fidelidade foi atualizado.",
+    `${loyaltyPoints} / 10 pizzas`,
+  ];
+
+  if (rewardAvailable) lines.push("", "Sua pizza grátis está disponível!");
+  lines.push("", `Acesse seu cartão: ${cardUrl}`);
+  return lines.join("\n");
 }

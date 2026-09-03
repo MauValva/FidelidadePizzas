@@ -37,6 +37,7 @@ senha depois, ou adicionar um segundo administrador, é só voltar nessa tela.
 ## 4. Pegue as chaves da API
 
 Em **Project Settings → API**, copie:
+
 - **Project URL** → vai em `NEXT_PUBLIC_SUPABASE_URL`
 - **anon / public key** → vai em `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - **service_role key** (clique em "Reveal" para ver) → vai em `SUPABASE_SERVICE_ROLE_KEY`
@@ -116,6 +117,7 @@ src/
 
 `src/lib/notifications.ts` isola toda notificação automática atrás de uma interface
 (`NotificationService`). Hoje ela só registra um `console.log` no servidor sempre que:
+
 - o admin adiciona um ponto (`notifyLoyaltyUpdate`)
 - o cliente atinge 10/10 (`notifyRewardUnlocked`)
 

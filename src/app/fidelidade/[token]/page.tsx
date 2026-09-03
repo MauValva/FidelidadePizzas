@@ -20,6 +20,7 @@ export default async function FidelidadePage({ params }: { params: Promise<{ tok
 
   const { data: settings } = await supabase.from("settings").select("*").eq("id", 1).single();
   const businessPhone = settings?.business_phone ?? "";
+  const pixKey = settings?.pix_key ?? "";
 
   return (
     <CustomerCard
@@ -33,6 +34,7 @@ export default async function FidelidadePage({ params }: { params: Promise<{ tok
         uniqueToken: customer.unique_token,
       }}
       businessPhone={businessPhone}
+      pixKey={pixKey}
     />
   );
 }

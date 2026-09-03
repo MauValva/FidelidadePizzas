@@ -7,9 +7,10 @@ import { buildOrderMessage, buildWhatsappUrl, formatMoney } from "@/lib/whatsapp
 type Props = {
   customer: PublicCustomer;
   businessPhone: string;
+  pixKey: string;
 };
 
-export function CustomerCard({ customer, businessPhone }: Props) {
+export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [quantities, setQuantities] = useState<Record<FlavorId, number>>({
     calabresa: 0,
@@ -44,6 +45,7 @@ export function CustomerCard({ customer, businessPhone }: Props) {
         customer,
         items,
         rewardFlavor: isRewardOrder ? rewardFlavor : null,
+        pixKey,
       });
 
       // Registra o pedido para o admin conferir depois (não altera pontos)

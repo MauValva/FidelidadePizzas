@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { buildLoyaltyUpdateMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 import { CustomerListItem, HistoryItem } from "@/types";
 
 export function AdminDashboard() {
@@ -10,6 +11,7 @@ export function AdminDashboard() {
   const [customers, setCustomers] = useState<CustomerListItem[] | null>(null);
   const [businessPhone, setBusinessPhone] = useState("");
   const [phoneInput, setPhoneInput] = useState("");
+  const [pixKey, setPixKey] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [historyFor, setHistoryFor] = useState<CustomerListItem | null>(null);
@@ -31,6 +33,7 @@ export function AdminDashboard() {
       const data = await res.json();
       setBusinessPhone(data.business_phone);
       setPhoneInput(data.business_phone);
+      setPixKey(data.pix_key ?? "");
     }
   }, []);
 
@@ -39,6 +42,17 @@ export function AdminDashboard() {
     loadSettings();
   }, [loadCustomers, loadSettings]);
 
+  function openCustomerWhatsapp(customer: CustomerListItem) {
+    const cardUrl = `${window.location.origin}/fidelidade/${customer.unique_token}`;
+    const message = buildLoyaltyUpdateMessage({
+      name: customer.name,
+      loyaltyPoints: customer.loyalty_points,
+      rewardAvailable: customer.reward_available,
+      cardUrl,
+    });
+    window.open(buildWhatsappUrl(customer.whatsapp, message), "_blank", "noopener,noreferrer");
+  }
+
   async function runAction(id: string, action: "add" | "remove" | "redeem", label: string) {
     const res = await fetch(`/api/customers/${id}/actions`, {
       method: "POST",
@@ -46,19 +60,21 @@ export function AdminDashboard() {
       body: JSON.stringify({ action }),
     });
     if (res.ok) {
+      const updated = (await res.json()) as CustomerListItem;
       showToast(label);
       loadCustomers();
+      openCustomerWhatsapp(updated);
     } else {
       const err = await res.json().catch(() => ({}));
       showToast(err.error ?? "Não foi possível completar a ação.");
     }
   }
 
-  async function savePhone() {
+  async function saveSettings() {
     const res = await fetch("/api/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ businessPhone: phoneInput }),
+      body: JSON.stringify({ businessPhone: phoneInput, pixKey }),
     });
     if (res.ok) {
       setBusinessPhone(phoneInput);
@@ -190,7 +206,11 @@ export function AdminDashboard() {
       <div style={{ marginTop: 24, fontSize: 12.5, color: "var(--crust-soft)" }}>
         WhatsApp do negócio (recebe os pedidos):
         <input value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} style={{ marginLeft: 6, padding: "6px 10px", borderRadius: 8, border: "1.5px solid var(--line)", fontSize: 13 }} />
-        <button onClick={savePhone} style={{ ...iconBtn, width: "auto", padding: "6px 12px", marginLeft: 6 }}>
+        <label style={{ marginLeft: 12 }}>
+          Chave PIX:
+          <input value={pixKey} onChange={(e) => setPixKey(e.target.value)} style={{ marginLeft: 6, padding: "6px 10px", borderRadius: 8, border: "1.5px solid var(--line)", fontSize: 13 }} placeholder="CPF, e-mail, telefone ou aleatória" />
+        </label>
+        <button onClick={saveSettings} style={{ ...iconBtn, width: "auto", padding: "6px 12px", marginLeft: 6 }}>
           Salvar
         </button>
         {businessPhone && <span style={{ marginLeft: 8 }}>atual: {businessPhone}</span>}

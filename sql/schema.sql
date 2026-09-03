@@ -59,8 +59,12 @@ create index if not exists idx_orders_customer on orders(customer_id);
 create table if not exists settings (
   id int primary key default 1,
   business_phone text not null default '5551999999999',
+  pix_key text not null default '',
   constraint settings_single_row check (id = 1)
 );
+
+-- Compatibilidade com bancos criados antes da chave PIX.
+alter table settings add column if not exists pix_key text not null default '';
 
 -- ---------- Dados iniciais ----------
 insert into settings (id, business_phone)
