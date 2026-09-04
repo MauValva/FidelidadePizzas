@@ -105,18 +105,19 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
         </div>
 
         <div style={{ display: "flex", gap: 7, margin: "14px 0", flexWrap: "wrap" }}>
-          {Array.from({ length: LOYALTY_GOAL }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: "50%",
-                background: i < customer.loyaltyPoints ? "var(--basil)" : "var(--dough-deep)",
-                border: `1.5px solid ${i < customer.loyaltyPoints ? "var(--basil)" : "var(--line)"}`,
-              }}
-            />
-          ))}
+          {Array.from({ length: LOYALTY_GOAL }).map((_, i) => {
+            const isFilled = i < customer.loyaltyPoints;
+            return (
+              <span
+                key={i}
+                role="img"
+                aria-label={isFilled ? "Pizza acumulada" : "Pizza restante"}
+                style={{ fontSize: 22, lineHeight: 1, filter: isFilled ? "none" : "grayscale(1)", opacity: isFilled ? 1 : 0.35 }}
+              >
+                🍕
+              </span>
+            );
+          })}
         </div>
 
         {isRewardOrder ? (

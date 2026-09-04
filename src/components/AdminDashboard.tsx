@@ -188,8 +188,8 @@ export function AdminDashboard() {
                       </button>
                     ) : (
                       <>
-                        <button onClick={() => runAction(c.id, "add", `+1 pizza para ${c.name}`)} style={iconBtn}>
-                          +1
+                        <button onClick={() => runAction(c.id, "add", `+1 pizza para ${c.name}`)} style={addPizzaBtn}>
+                          + Pizza
                         </button>
                         <button onClick={() => runAction(c.id, "remove", `-1 pizza para ${c.name}`)} style={iconBtn}>
                           −1
@@ -320,6 +320,17 @@ const iconBtn: React.CSSProperties = {
   cursor: "pointer",
   fontSize: 14,
 };
+const addPizzaBtn: React.CSSProperties = {
+  background: "var(--tomato)",
+  color: "white",
+  border: "none",
+  borderRadius: 8,
+  padding: "7px 10px",
+  cursor: "pointer",
+  fontSize: 12.5,
+  fontWeight: 700,
+  boxShadow: "0 3px 8px rgba(193,68,45,0.25)",
+};
 const sendLinkBtn: React.CSSProperties = {
   background: "white",
   color: "var(--tomato-deep)",
@@ -363,7 +374,10 @@ function NewCustomerModal({ onClose, onCreated }: { onClose: () => void; onCreat
     });
     setSaving(false);
     if (res.ok) onCreated();
-    else setError("Não foi possível cadastrar o cliente.");
+    else {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Não foi possível cadastrar o cliente.");
+    }
   }
 
   return (

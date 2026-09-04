@@ -21,6 +21,7 @@ create table if not exists customers (
 );
 
 create index if not exists idx_customers_unique_token on customers(unique_token);
+create unique index if not exists idx_customers_block_apartment on customers(block, apartment);
 
 -- ---------- Histórico de fidelidade ----------
 create table if not exists loyalty_transactions (
