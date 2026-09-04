@@ -1,4 +1,4 @@
-import { LOYALTY_GOAL } from "@/types";
+import { buildLoyaltyUpdateMessage, buildRewardUnlockedMessage } from "@/lib/whatsapp";
 
 type NotifiableCustomer = {
   name: string;
@@ -27,37 +27,22 @@ function cardLink(uniqueToken: string): string {
 
 class ConsoleNotificationService implements NotificationService {
   async notifyLoyaltyUpdate(customer: NotifiableCustomer) {
-    const remaining = LOYALTY_GOAL - customer.loyaltyPoints;
-    const message = [
-      "🍕 Pizzas Viver Canoas — Fidelidade",
-      "",
-      `Olá, ${customer.name}!`,
-      "",
-      "Seu cartão fidelidade foi atualizado. 🔥",
-      "",
-      `${customer.loyaltyPoints} / ${LOYALTY_GOAL} pizzas`,
-      "",
-      `Faltam apenas ${remaining} pizza${remaining === 1 ? "" : "s"} para você ganhar uma pizza grátis! 🎁`,
-      "",
-      `👉 Acesse seu cartão: ${cardLink(customer.uniqueToken)}`,
-    ].join("\n");
+    const message = buildLoyaltyUpdateMessage({
+      name: customer.name,
+      loyaltyPoints: customer.loyaltyPoints,
+      rewardAvailable: false,
+      cardUrl: cardLink(customer.uniqueToken),
+    });
 
     // TODO: substituir por chamada real à WhatsApp Business API
     console.log(`[notify:${customer.whatsapp}]\n${message}`);
   }
 
   async notifyRewardUnlocked(customer: NotifiableCustomer) {
-    const message = [
-      "🎉 Pizzas Viver Canoas — Você ganhou uma pizza!",
-      "",
-      `Parabéns, ${customer.name}!`,
-      "",
-      `Você completou ${LOYALTY_GOAL} pizzas no seu cartão fidelidade. 🍕`,
-      "",
-      "🎁 Você ganhou 1 pizza grátis!",
-      "",
-      `Acesse seu cartão para escolher seu sabor e fazer seu pedido: ${cardLink(customer.uniqueToken)}`,
-    ].join("\n");
+    const message = buildRewardUnlockedMessage({
+      name: customer.name,
+      cardUrl: cardLink(customer.uniqueToken),
+    });
 
     // TODO: substituir por chamada real à WhatsApp Business API
     console.log(`[notify:${customer.whatsapp}]\n${message}`);

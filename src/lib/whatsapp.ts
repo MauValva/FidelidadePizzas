@@ -23,7 +23,7 @@ export function buildOrderMessage(params: {
   const nonZeroItems = items.filter((i) => i.quantity > 0);
   const total = nonZeroItems.reduce((sum, i) => sum + i.quantity * PIZZA_PRICE, 0);
 
-  const lines: string[] = ["Olá! Gostaria de fazer um pedido de pizza. 🍕", ""];
+  const lines: string[] = ["Olá! Gostaria de fazer um pedido de pizza.", ""];
   lines.push("📦 Entrega:");
   lines.push(`Bloco ${customer.block} — Apartamento ${customer.apartment}`);
   lines.push("");
@@ -65,27 +65,62 @@ export function buildLoyaltyUpdateMessage(params: {
   cardUrl: string;
 }): string {
   const { name, loyaltyPoints, rewardAvailable, cardUrl } = params;
-  const lines = [
-    "Pizzas Viver Canoas — Fidelidade",
+  if (rewardAvailable) return buildRewardUnlockedMessage({ name, cardUrl });
+
+  return [
+    "🍕 Pizzas Viver Canoas — Fidelidade 🍕",
     "",
-    `Olá, ${name}!`,
+    `Oi, ${name}! 😊`,
     "",
     "Seu cartão fidelidade foi atualizado.",
-    `${loyaltyPoints} / 10 pizzas`,
-  ];
+    "",
+    `🍕 ${loyaltyPoints} / 10 pizzas`,
+    "",
+    "Continue acumulando e ganhe uma pizza grátis ao completar o cartão! 🎁",
+    "",
+    "👉 Acesse seu cartão:",
+    `🔗 ${cardUrl}`,
+  ].join("\n");
+}
 
-  if (rewardAvailable) lines.push("", "Sua pizza grátis está disponível!");
-  lines.push("", `Acesse seu cartão: ${cardUrl}`);
-  return lines.join("\n");
+export function buildRewardUnlockedMessage(params: { name: string; cardUrl: string }): string {
+  const { name, cardUrl } = params;
+  return [
+    "🍕 Pizzas Viver Canoas — Fidelidade 🎉",
+    "",
+    `Olá, ${name}! 😊`,
+    "",
+    "🎁 Parabéns! Você completou seu cartão fidelidade!",
+    "",
+    "Você ganhou 1 pizza grátis 🍕",
+    "",
+    "Na sua próxima compra, escolha seu sabor favorito:",
+    "🍕 Calabresa",
+    "🍕 Mussarela",
+    "🍕 Mista",
+    "",
+    "Seu prêmio já está disponível no seu cartão:",
+    "",
+    `🔗 ${cardUrl}`,
+  ].join("\n");
 }
 
 export function buildAccessLinkMessage(params: { name: string; cardUrl: string }): string {
   const { name, cardUrl } = params;
   return [
-    `Olá, ${name}!`,
+    "🍕 Pizzas Viver Canoas — Fidelidade 🎉",
     "",
-    "Esse é seu link de acesso para fazer pedidos e acompanhar sua fidelidade.",
+    `Olá, ${name}! 😊`,
     "",
-    cardUrl,
+    "Criamos um cartão fidelidade exclusivo para você acompanhar suas pizzas e ficar cada vez mais perto de ganhar uma pizza grátis! 🎁🍕",
+    "",
+    "Nesse link você pode:",
+    "✅ Acompanhar sua fidelidade",
+    "🍕 Fazer seus pedidos",
+    "🎁 Ver quando sua pizza grátis estiver disponível",
+    "",
+    "Acesse seu cartão:",
+    "",
+    `🔗 ${cardUrl}`,
   ].join("\n");
 }
