@@ -16,6 +16,7 @@ export function AdminDashboard() {
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [historyFor, setHistoryFor] = useState<CustomerListItem | null>(null);
   const [history, setHistory] = useState<HistoryItem[] | null>(null);
+  const [activeScreen, setActiveScreen] = useState<"customers" | "insights" | "profile">("customers");
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -63,7 +64,7 @@ export function AdminDashboard() {
       const updated = (await res.json()) as CustomerListItem;
       showToast(label);
       loadCustomers();
-      openCustomerWhatsapp(updated);
+      if (action !== "redeem") openCustomerWhatsapp(updated);
     } else {
       const err = await res.json().catch(() => ({}));
       showToast(err.error ?? "Não foi possível completar a ação.");
@@ -109,24 +110,28 @@ export function AdminDashboard() {
   const totalPizzas = customers.reduce((s, c) => s + c.total_pizzas, 0);
   const nearReward = customers.filter((c) => c.loyalty_points >= 8 && c.loyalty_points < 10).length;
   const rewardsAvail = customers.filter((c) => c.reward_available).length;
+  const screenTitle = activeScreen === "customers" ? "Clientes" : activeScreen === "insights" ? "Informações" : "Perfil";
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 18px 60px", minHeight: "100vh" }}>
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 18px 104px", minHeight: "100vh" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <h1 style={{ fontSize: 22, margin: 0 }}>Pizzas Viver Canoas — Admin</h1>
+        <div>
+          <p style={{ color: "var(--tomato-deep)", fontSize: 12, fontWeight: 700, letterSpacing: 0.4, margin: "0 0 3px", textTransform: "uppercase" }}>Pizzas Viver Canoas</p>
+          <h1 style={{ fontSize: 22, margin: 0 }}>{screenTitle}</h1>
+        </div>
         <button onClick={handleLogout} style={ghostBtn}>
           Sair
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 12, marginBottom: 24 }}>
+      {activeScreen === "insights" && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 12, marginBottom: 24 }}>
         <StatCard num={customers.length} label="Clientes" />
         <StatCard num={totalPizzas} label="Pizzas registradas" />
         <StatCard num={nearReward} label="Clientes com 8+ pizzas" />
         <StatCard num={rewardsAvail} label="Recompensas disponíveis" />
-      </div>
+      </div>}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      {activeScreen === "customers" && <><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <h2 style={{ fontSize: 17, margin: 0 }}>Clientes</h2>
         <button onClick={() => setShowNewCustomer(true)} style={primaryBtn}>
           + Novo cliente
@@ -134,7 +139,7 @@ export function AdminDashboard() {
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", background: "white", borderRadius: 14, overflow: "hidden", boxShadow: "var(--shadow)" }}>
+        <table className="customer-list-table" style={{ width: "100%", borderCollapse: "collapse", background: "white", borderRadius: 14, overflow: "hidden", boxShadow: "var(--shadow)" }}>
           <thead>
             <tr>
               <Th>Cliente</Th>
@@ -147,15 +152,15 @@ export function AdminDashboard() {
           <tbody>
             {customers.map((c) => (
               <tr key={c.id}>
-                <Td>
+                <Td label="Cliente">
                   {c.name}
                   <br />
                   <span style={{ color: "var(--crust-soft)", fontSize: 12 }}>{c.whatsapp}</span>
                 </Td>
-                <Td>
+                <Td label="Apartamento">
                   {c.block}-{c.apartment}
                 </Td>
-                <Td>
+                <Td label="Fidelidade">
                   <span
                     style={{
                       display: "inline-flex",
@@ -170,12 +175,12 @@ export function AdminDashboard() {
                     {c.loyalty_points}/10 {c.reward_available ? "🎁" : ""}
                   </span>
                 </Td>
-                <Td>
+                <Td label="Link">
                   <button onClick={() => sendAccessLink(c)} style={sendLinkBtn}>
                     Enviar link
                   </button>
                 </Td>
-                <Td>
+                <Td label="Ações">
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {c.reward_available ? (
                       <button onClick={() => runAction(c.id, "redeem", `Recompensa resgatada — ${c.name}`)} style={primaryBtn}>
@@ -200,9 +205,9 @@ export function AdminDashboard() {
             ))}
           </tbody>
         </table>
-      </div>
+      </div></>}
 
-      <div style={{ marginTop: 24, fontSize: 12.5, color: "var(--crust-soft)" }}>
+      {activeScreen === "profile" && <div style={{ marginTop: 24, fontSize: 12.5, color: "var(--crust-soft)", background: "white", borderRadius: 14, padding: 18, boxShadow: "var(--shadow)" }}>
         WhatsApp do negócio (recebe os pedidos):
         <input value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} style={{ marginLeft: 6, padding: "6px 10px", borderRadius: 8, border: "1.5px solid var(--line)", fontSize: 13 }} />
         <label style={{ marginLeft: 12 }}>
@@ -213,7 +218,7 @@ export function AdminDashboard() {
           Salvar
         </button>
         {businessPhone && <span style={{ marginLeft: 8 }}>atual: {businessPhone}</span>}
-      </div>
+      </div>}
 
       {showNewCustomer && (
         <NewCustomerModal
@@ -234,7 +239,7 @@ export function AdminDashboard() {
         <div
           style={{
             position: "fixed",
-            bottom: 20,
+            bottom: 86,
             left: "50%",
             transform: "translateX(-50%)",
             background: "var(--crust)",
@@ -249,7 +254,24 @@ export function AdminDashboard() {
           {toast}
         </div>
       )}
+
+      <nav aria-label="Navegação do painel" style={bottomNav}>
+        <div style={{ maxWidth: 520, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", padding: "7px 12px" }}>
+          <NavItem icon="👥" label="Clientes" active={activeScreen === "customers"} onClick={() => setActiveScreen("customers")} />
+          <NavItem icon="📊" label="Informações" active={activeScreen === "insights"} onClick={() => setActiveScreen("insights")} />
+          <NavItem icon="⚙️" label="Perfil" active={activeScreen === "profile"} onClick={() => setActiveScreen("profile")} />
+        </div>
+      </nav>
     </div>
+  );
+}
+
+function NavItem({ icon, label, active, onClick }: { icon: string; label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-current={active ? "page" : undefined} style={{ border: "none", background: "transparent", color: active ? "var(--tomato-deep)" : "var(--crust-soft)", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, fontSize: 11.5, fontWeight: active ? 700 : 500, padding: "5px 8px" }}>
+      <span style={{ fontSize: 18, lineHeight: 1 }}>{icon}</span>
+      {label}
+    </button>
   );
 }
 
@@ -265,8 +287,8 @@ function StatCard({ num, label }: { num: number; label: string }) {
 function Th({ children }: { children: React.ReactNode }) {
   return <th style={{ textAlign: "left", fontSize: 12, color: "var(--crust-soft)", padding: "12px 14px", borderBottom: "1px solid var(--line)", fontWeight: 600 }}>{children}</th>;
 }
-function Td({ children }: { children: React.ReactNode }) {
-  return <td style={{ padding: "12px 14px", borderBottom: "1px solid var(--line)", fontSize: 14, verticalAlign: "middle" }}>{children}</td>;
+function Td({ children, label }: { children: React.ReactNode; label?: string }) {
+  return <td data-label={label} style={{ padding: "12px 14px", borderBottom: "1px solid var(--line)", fontSize: 14, verticalAlign: "middle" }}>{children}</td>;
 }
 
 const primaryBtn: React.CSSProperties = {
@@ -308,6 +330,16 @@ const sendLinkBtn: React.CSSProperties = {
   cursor: "pointer",
   fontWeight: 600,
   whiteSpace: "nowrap",
+};
+const bottomNav: React.CSSProperties = {
+  position: "fixed",
+  bottom: 0,
+  left: 0,
+  right: 0,
+  zIndex: 40,
+  background: "rgba(255,255,255,0.97)",
+  borderTop: "1px solid var(--line)",
+  boxShadow: "0 -5px 18px rgba(36,21,18,0.08)",
 };
 
 function NewCustomerModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {

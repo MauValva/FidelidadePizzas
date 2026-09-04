@@ -48,3 +48,62 @@ button {
 input {
   font-family: inherit;
 }
+
+@media (max-width: 640px) {
+  .customer-list-table,
+  .customer-list-table tbody,
+  .customer-list-table tr,
+  .customer-list-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .customer-list-table {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .customer-list-table thead {
+    display: none;
+  }
+
+  .customer-list-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .customer-list-table tr {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    padding: 4px 0;
+  }
+
+  .customer-list-table td {
+    border: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 9px 14px !important;
+    text-align: right;
+  }
+
+  .customer-list-table td::before {
+    content: attr(data-label);
+    color: var(--crust-soft);
+    flex: 0 0 82px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .customer-list-table td:first-child {
+    align-items: flex-start;
+  }
+
+  .customer-list-table td:last-child > div {
+    justify-content: flex-end;
+  }
+}
