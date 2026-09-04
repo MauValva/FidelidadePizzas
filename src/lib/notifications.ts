@@ -29,7 +29,7 @@ class ConsoleNotificationService implements NotificationService {
   async notifyLoyaltyUpdate(customer: NotifiableCustomer) {
     const remaining = LOYALTY_GOAL - customer.loyaltyPoints;
     const message = [
-      "🍕 Atelier do Pão — Fidelidade",
+      "🍕 Pizzas Viver Canoas — Fidelidade",
       "",
       `Olá, ${customer.name}!`,
       "",
@@ -48,7 +48,7 @@ class ConsoleNotificationService implements NotificationService {
 
   async notifyRewardUnlocked(customer: NotifiableCustomer) {
     const message = [
-      "🎉 Atelier do Pão — Você ganhou uma pizza!",
+      "🎉 Pizzas Viver Canoas — Você ganhou uma pizza!",
       "",
       `Parabéns, ${customer.name}!`,
       "",

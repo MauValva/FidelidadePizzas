@@ -78,7 +78,7 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
         }}
       >
         <p style={{ fontSize: 13, color: "var(--cheese)", fontWeight: 600, margin: "0 0 6px" }}>
-          Atelier do Pão
+          Pizzas Viver Canoas
         </p>
         <h1 style={{ margin: 0, fontSize: 26, fontWeight: 600 }}>Olá, {customer.name}!</h1>
         <p style={{ marginTop: 2, fontSize: 15, color: "rgba(251,243,230,0.7)" }}>

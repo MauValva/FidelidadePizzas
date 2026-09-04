@@ -1,5 +1,5 @@
 -- ============================================================
--- Atelier do Pão — Sistema de Fidelidade
+-- Pizzas Viver Canoas — Sistema de Fidelidade
 -- Rode este script inteiro em: Supabase > SQL Editor > New query
 -- ============================================================
 
@@ -26,7 +26,7 @@ create index if not exists idx_customers_unique_token on customers(unique_token)
 create table if not exists loyalty_transactions (
   id uuid primary key default gen_random_uuid(),
   customer_id uuid not null references customers(id) on delete cascade,
-  type text not null check (type in ('purchase', 'correction', 'reward_redeemed')),
+  type text not null check (type in ('purchase', 'reward_redeemed')),
   points int not null,
   balance_after int not null,
   description text,

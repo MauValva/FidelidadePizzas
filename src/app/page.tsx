@@ -14,7 +14,7 @@ export default function Home() {
         textAlign: "center",
       }}
     >
-      <h1 style={{ fontSize: 28 }}>🍕 Atelier do Pão</h1>
+      <h1 style={{ fontSize: 28 }}>🍕 Pizzas Viver Canoas</h1>
       <p style={{ color: "var(--crust-soft)", maxWidth: 380 }}>
         Cada cliente acessa seu cartão fidelidade através de um link único enviado pelo
         WhatsApp. Esta página inicial não é usada no dia a dia.

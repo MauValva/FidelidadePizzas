@@ -1,4 +1,4 @@
-# 🍕 Atelier do Pão — Sistema de Fidelidade (v2, direto no Supabase)
+# 🍕 Pizzas Viver Canoas — Sistema de Fidelidade (v2, direto no Supabase)
 
 Cartão fidelidade digital + painel administrativo + gerador de pedidos para WhatsApp.
 Next.js (App Router) + TypeScript + Supabase (banco + autenticação), pronto para deploy no Vercel.
@@ -62,7 +62,7 @@ npm run dev
 ```
 
 - Painel admin: http://localhost:3000/admin (login com o e-mail/senha do passo 3)
-- Cartão de um cliente: cadastre um cliente no painel, clique em **"copiar link"** e abra em
+- Cartão de um cliente: cadastre um cliente no painel e clique em **"Enviar link"** para abrir o WhatsApp com a mensagem e o acesso do cliente.
   outra aba (ou no celular)
 
 ---

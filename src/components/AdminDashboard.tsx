@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { buildLoyaltyUpdateMessage, buildWhatsappUrl } from "@/lib/whatsapp";
+import { buildAccessLinkMessage, buildLoyaltyUpdateMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 import { CustomerListItem, HistoryItem } from "@/types";
 
 export function AdminDashboard() {
@@ -89,11 +89,10 @@ export function AdminDashboard() {
     if (res.ok) setHistory(await res.json());
   }
 
-  function copyLink(token: string) {
-    const base = window.location.origin;
-    const link = `${base}/fidelidade/${token}`;
-    navigator.clipboard?.writeText(link).catch(() => {});
-    showToast(`Link copiado: ${link}`);
+  function sendAccessLink(customer: CustomerListItem) {
+    const cardUrl = `${window.location.origin}/fidelidade/${customer.unique_token}`;
+    const message = buildAccessLinkMessage({ name: customer.name, cardUrl });
+    window.open(buildWhatsappUrl(customer.whatsapp, message), "_blank", "noopener,noreferrer");
   }
 
   async function handleLogout() {
@@ -114,7 +113,7 @@ export function AdminDashboard() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 18px 60px", minHeight: "100vh" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <h1 style={{ fontSize: 22, margin: 0 }}>Atelier do Pão — Admin</h1>
+        <h1 style={{ fontSize: 22, margin: 0 }}>Pizzas Viver Canoas — Admin</h1>
         <button onClick={handleLogout} style={ghostBtn}>
           Sair
         </button>
@@ -172,9 +171,9 @@ export function AdminDashboard() {
                   </span>
                 </Td>
                 <Td>
-                  <span onClick={() => copyLink(c.unique_token)} style={{ fontSize: 12, color: "var(--tomato-deep)", cursor: "pointer", textDecoration: "underline" }}>
-                    copiar link
-                  </span>
+                  <button onClick={() => sendAccessLink(c)} style={sendLinkBtn}>
+                    Enviar link
+                  </button>
                 </Td>
                 <Td>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -298,6 +297,17 @@ const iconBtn: React.CSSProperties = {
   background: "white",
   cursor: "pointer",
   fontSize: 14,
+};
+const sendLinkBtn: React.CSSProperties = {
+  background: "white",
+  color: "var(--tomato-deep)",
+  border: "1.5px solid var(--tomato)",
+  borderRadius: 8,
+  padding: "6px 10px",
+  fontSize: 12,
+  cursor: "pointer",
+  fontWeight: 600,
+  whiteSpace: "nowrap",
 };
 
 function NewCustomerModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {

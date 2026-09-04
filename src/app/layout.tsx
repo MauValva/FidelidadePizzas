@@ -15,8 +15,8 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Atelier do Pão — Fidelidade",
-  description: "Cartão fidelidade digital do Atelier do Pão",
+  title: "Pizzas Viver Canoas — Fidelidade",
+  description: "Cartão fidelidade digital da Pizzas Viver Canoas",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

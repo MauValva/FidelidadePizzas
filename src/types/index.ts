@@ -24,7 +24,7 @@ export type PublicCustomer = {
   uniqueToken: string;
 };
 
-export type TransactionType = "purchase" | "correction" | "reward_redeemed";
+export type TransactionType = "purchase" | "reward_redeemed";
 
 // Formato "cru" como vem do Supabase (colunas em snake_case)
 export type CustomerListItem = {

@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
         }}
       >
         <h2 style={{ marginTop: 0 }}>Painel administrativo</h2>
-        <p style={{ color: "var(--crust-soft)", fontSize: 14 }}>Atelier do Pão</p>
+        <p style={{ color: "var(--crust-soft)", fontSize: 14 }}>Pizzas Viver Canoas</p>
 
         <input
           type="email"

@@ -12,6 +12,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     .from("loyalty_transactions")
     .select("*")
     .eq("customer_id", id)
+    .in("type", ["purchase", "reward_redeemed"])
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

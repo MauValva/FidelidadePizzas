@@ -93,14 +93,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
 
-    await supabase.from("loyalty_transactions").insert({
-      customer_id: customer.id,
-      type: "correction",
-      points: -1,
-      description: "Correção administrativa",
-      balance_after: newPoints,
-    });
-
     return NextResponse.json(updated);
   }
 

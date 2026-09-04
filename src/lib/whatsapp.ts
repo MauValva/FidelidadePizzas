@@ -66,7 +66,7 @@ export function buildLoyaltyUpdateMessage(params: {
 }): string {
   const { name, loyaltyPoints, rewardAvailable, cardUrl } = params;
   const lines = [
-    "Atelier do Pão — Fidelidade",
+    "Pizzas Viver Canoas — Fidelidade",
     "",
     `Olá, ${name}!`,
     "",
@@ -77,4 +77,15 @@ export function buildLoyaltyUpdateMessage(params: {
   if (rewardAvailable) lines.push("", "Sua pizza grátis está disponível!");
   lines.push("", `Acesse seu cartão: ${cardUrl}`);
   return lines.join("\n");
+}
+
+export function buildAccessLinkMessage(params: { name: string; cardUrl: string }): string {
+  const { name, cardUrl } = params;
+  return [
+    `Olá, ${name}!`,
+    "",
+    "Esse é seu link de acesso para fazer pedidos e acompanhar sua fidelidade.",
+    "",
+    cardUrl,
+  ].join("\n");
 }
