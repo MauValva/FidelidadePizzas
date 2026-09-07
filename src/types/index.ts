@@ -37,6 +37,7 @@ export type CustomerListItem = {
   reward_available: boolean;
   total_pizzas: number;
   unique_token: string;
+  last_purchase_at: string | null;
   created_at: string;
   updated_at: string;
 };

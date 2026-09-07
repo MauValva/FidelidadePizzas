@@ -16,6 +16,7 @@ create table if not exists customers (
   reward_available boolean not null default false,
   total_pizzas int not null default 0,
   unique_token text not null unique,
+  last_purchase_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -66,6 +67,27 @@ create table if not exists settings (
 
 -- Compatibilidade com bancos criados antes da chave PIX.
 alter table settings add column if not exists pix_key text not null default '';
+
+-- Compatibilidade com bancos criados antes do registro da última compra.
+alter table customers add column if not exists last_purchase_at timestamptz;
+
+-- Preenche clientes já cadastrados com a última compra registrada.
+update customers c
+set last_purchase_at = (
+  select max(purchase_date)
+  from (
+    select o.created_at as purchase_date
+    from orders o
+    where o.customer_id = c.id
+
+    union all
+
+    select lt.created_at as purchase_date
+    from loyalty_transactions lt
+    where lt.customer_id = c.id and lt.type = 'purchase'
+  ) as purchases
+)
+where c.last_purchase_at is null;
 
 -- ---------- Dados iniciais ----------
 insert into settings (id, business_phone)

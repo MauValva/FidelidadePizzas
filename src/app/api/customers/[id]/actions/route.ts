@@ -43,6 +43,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         loyalty_points: newPoints,
         reward_available: rewardAvailable,
         total_pizzas: customer.total_pizzas + 1,
+        last_purchase_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", customer.id)

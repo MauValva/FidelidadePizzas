@@ -47,7 +47,11 @@ export function buildOrderMessage(params: {
   lines.push(`💰 Total: ${formatMoney(total)}`);
 
   if (pixKey?.trim()) {
-    lines.push("", `PIX para pagamento: ${pixKey.trim()}`);
+    lines.push(
+      "",
+      `PIX para pagamento: ${pixKey.trim()}`,
+      "Envie o comprovante de pagamento por aqui, por favor."
+    );
   }
 
   return { message: lines.join("\n"), total };

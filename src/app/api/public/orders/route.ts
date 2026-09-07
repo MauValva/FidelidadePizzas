@@ -40,5 +40,15 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (orderError) return NextResponse.json({ error: orderError.message }, { status: 500 });
+
+  const { error: customerUpdateError } = await supabase
+    .from("customers")
+    .update({ last_purchase_at: new Date().toISOString() })
+    .eq("id", customer.id);
+
+  if (customerUpdateError) {
+    return NextResponse.json({ error: customerUpdateError.message }, { status: 500 });
+  }
+
   return NextResponse.json(order, { status: 201 });
 }

@@ -144,6 +144,7 @@ export function AdminDashboard() {
             <tr>
               <Th>Cliente</Th>
               <Th>Apto</Th>
+              <Th>Última compra</Th>
               <Th>Fidelidade</Th>
               <Th>Link</Th>
               <Th>Ação</Th>
@@ -159,6 +160,11 @@ export function AdminDashboard() {
                 </Td>
                 <Td label="Apartamento">
                   {c.block}-{c.apartment}
+                </Td>
+                <Td label="Última compra">
+                  {c.last_purchase_at
+                    ? new Date(c.last_purchase_at).toLocaleDateString("pt-BR")
+                    : "—"}
                 </Td>
                 <Td label="Fidelidade">
                   <span
