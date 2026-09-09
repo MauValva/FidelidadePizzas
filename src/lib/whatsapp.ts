@@ -1,4 +1,10 @@
-import { FLAVORS, FlavorId, OrderItem, PIZZA_PRICE, PublicCustomer } from "@/types";
+import {
+  FLAVORS,
+  FlavorId,
+  OrderItem,
+  PIZZA_PRICE,
+  PublicCustomer,
+} from "@/types";
 
 export function formatMoney(value: number): string {
   return `R$ ${value.toFixed(2).replace(".", ",")}`;
@@ -21,7 +27,10 @@ export function buildOrderMessage(params: {
 }): { message: string; total: number } {
   const { customer, items, rewardFlavor, pixKey } = params;
   const nonZeroItems = items.filter((i) => i.quantity > 0);
-  const total = nonZeroItems.reduce((sum, i) => sum + i.quantity * PIZZA_PRICE, 0);
+  const total = nonZeroItems.reduce(
+    (sum, i) => sum + i.quantity * PIZZA_PRICE,
+    0,
+  );
 
   const lines: string[] = ["Olá! Gostaria de fazer um pedido de pizza.", ""];
   lines.push("📦 Entrega:");
@@ -36,11 +45,15 @@ export function buildOrderMessage(params: {
     if (nonZeroItems.length > 0) {
       lines.push("");
       lines.push("🍕 Pizzas adicionais:");
-      nonZeroItems.forEach((i) => lines.push(`${i.quantity}x ${flavorName(i.flavor)}`));
+      nonZeroItems.forEach((i) =>
+        lines.push(`${i.quantity}x ${flavorName(i.flavor)}`),
+      );
     }
   } else {
     lines.push("🍕 Pedido:");
-    nonZeroItems.forEach((i) => lines.push(`${i.quantity}x ${flavorName(i.flavor)}`));
+    nonZeroItems.forEach((i) =>
+      lines.push(`${i.quantity}x ${flavorName(i.flavor)}`),
+    );
   }
 
   lines.push("");
@@ -50,7 +63,7 @@ export function buildOrderMessage(params: {
     lines.push(
       "",
       `PIX para pagamento: ${pixKey.trim()}`,
-      "Envie o comprovante de pagamento por aqui, por favor."
+      "Envie o comprovante de pagamento por aqui, por favor.",
     );
   }
 
@@ -87,7 +100,10 @@ export function buildLoyaltyUpdateMessage(params: {
   ].join("\n");
 }
 
-export function buildRewardUnlockedMessage(params: { name: string; cardUrl: string }): string {
+export function buildRewardUnlockedMessage(params: {
+  name: string;
+  cardUrl: string;
+}): string {
   const { name, cardUrl } = params;
   return [
     "🍕 Pizzas Viver Canoas — Fidelidade 🎉",
@@ -109,7 +125,10 @@ export function buildRewardUnlockedMessage(params: { name: string; cardUrl: stri
   ].join("\n");
 }
 
-export function buildAccessLinkMessage(params: { name: string; cardUrl: string }): string {
+export function buildAccessLinkMessage(params: {
+  name: string;
+  cardUrl: string;
+}): string {
   const { name, cardUrl } = params;
   return [
     "🍕 Pizzas Viver Canoas — Fidelidade 🎉",

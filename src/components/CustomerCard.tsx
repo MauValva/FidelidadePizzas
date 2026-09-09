@@ -1,8 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { FLAVORS, FlavorId, LOYALTY_GOAL, PIZZA_PRICE, PublicCustomer } from "@/types";
-import { buildOrderMessage, buildWhatsappUrl, formatMoney } from "@/lib/whatsapp";
+import {
+  FLAVORS,
+  FlavorId,
+  LOYALTY_GOAL,
+  PIZZA_PRICE,
+  PublicCustomer,
+} from "@/types";
+import {
+  buildOrderMessage,
+  buildWhatsappUrl,
+  formatMoney,
+} from "@/lib/whatsapp";
 
 type Props = {
   customer: PublicCustomer;
@@ -21,7 +31,10 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
   const [sending, setSending] = useState(false);
 
   const isRewardOrder = customer.rewardAvailable;
-  const items = FLAVORS.map((f) => ({ flavor: f.id, quantity: quantities[f.id] }));
+  const items = FLAVORS.map((f) => ({
+    flavor: f.id,
+    quantity: quantities[f.id],
+  }));
   const total = items.reduce((sum, i) => sum + i.quantity * PIZZA_PRICE, 0);
   const remaining = LOYALTY_GOAL - customer.loyaltyPoints;
 
@@ -38,38 +51,57 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
     setModalOpen(true);
   }
 
-  async function handleSendWhatsapp() {
+  function handleSendWhatsapp() {
     setSending(true);
-    try {
-      const { message } = buildOrderMessage({
-        customer,
+
+    const { message } = buildOrderMessage({
+      customer,
+      items,
+      rewardFlavor: isRewardOrder ? rewardFlavor : null,
+      pixKey,
+    });
+
+    const whatsappUrl = buildWhatsappUrl(businessPhone, message);
+
+    // 1) Abre o WhatsApp IMEDIATAMENTE, ainda dentro do clique (síncrono)
+    const win = window.open(whatsappUrl, "_blank");
+
+    // 2) Se o navegador bloqueou mesmo assim, avisa o cliente e dá um link manual
+    if (!win) {
+      setSending(false);
+      alert(
+        "Não consegui abrir o WhatsApp automaticamente. Toque no botão novamente.",
+      );
+      // opcional: guardar whatsappUrl num estado e mostrar um <a href={whatsappUrl}> como fallback
+      return;
+    }
+
+    setModalOpen(false);
+    setSending(false);
+
+    // 3) Log do pedido acontece DEPOIS, em segundo plano, sem travar o clique
+    fetch("/api/public/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: customer.uniqueToken,
         items,
         rewardFlavor: isRewardOrder ? rewardFlavor : null,
-        pixKey,
-      });
-
-      // Registra o pedido para o admin conferir depois (não altera pontos)
-      await fetch("/api/public/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: customer.uniqueToken,
-          items,
-          rewardFlavor: isRewardOrder ? rewardFlavor : null,
-        }),
-      }).catch(() => {
-        // Se o log falhar, ainda deixamos o cliente enviar a mensagem
-      });
-
-      window.open(buildWhatsappUrl(businessPhone, message), "_blank");
-      setModalOpen(false);
-    } finally {
-      setSending(false);
-    }
+      }),
+    }).catch(() => {
+      // se falhar o log, não tem problema, o pedido já foi enviado via WhatsApp
+    });
   }
 
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", background: "var(--dough)" }}>
+    <div
+      style={{
+        maxWidth: 480,
+        margin: "0 auto",
+        minHeight: "100vh",
+        background: "var(--dough)",
+      }}
+    >
       <div
         style={{
           background: "var(--char)",
@@ -77,11 +109,22 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
           padding: "28px 22px 34px",
         }}
       >
-        <p style={{ fontSize: 13, color: "var(--cheese)", fontWeight: 600, margin: "0 0 6px" }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--cheese)",
+            fontWeight: 600,
+            margin: "0 0 6px",
+          }}
+        >
           Pizzas Viver Canoas
         </p>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 600 }}>Olá, {customer.name}!</h1>
-        <p style={{ marginTop: 2, fontSize: 15, color: "rgba(251,243,230,0.7)" }}>
+        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 600 }}>
+          Olá, {customer.name}!
+        </h1>
+        <p
+          style={{ marginTop: 2, fontSize: 15, color: "rgba(251,243,230,0.7)" }}
+        >
           Bloco {customer.block} — Apartamento {customer.apartment}
         </p>
       </div>
@@ -99,12 +142,25 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
       >
         <div style={{ fontSize: 34, fontWeight: 600, lineHeight: 1 }}>
           {customer.loyaltyPoints}
-          <small style={{ fontSize: 16, fontWeight: 400, color: "var(--crust-soft)" }}>
+          <small
+            style={{
+              fontSize: 16,
+              fontWeight: 400,
+              color: "var(--crust-soft)",
+            }}
+          >
             /{LOYALTY_GOAL} pizzas
           </small>
         </div>
 
-        <div style={{ display: "flex", gap: 7, margin: "14px 0", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 7,
+            margin: "14px 0",
+            flexWrap: "wrap",
+          }}
+        >
           {Array.from({ length: LOYALTY_GOAL }).map((_, i) => {
             const isFilled = i < customer.loyaltyPoints;
             return (
@@ -112,7 +168,12 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
                 key={i}
                 role="img"
                 aria-label={isFilled ? "Pizza acumulada" : "Pizza restante"}
-                style={{ fontSize: 22, lineHeight: 1, filter: isFilled ? "none" : "grayscale(1)", opacity: isFilled ? 1 : 0.35 }}
+                style={{
+                  fontSize: 22,
+                  lineHeight: 1,
+                  filter: isFilled ? "none" : "grayscale(1)",
+                  opacity: isFilled ? 1 : 0.35,
+                }}
               >
                 🍕
               </span>
@@ -123,23 +184,39 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
         {isRewardOrder ? (
           <div
             style={{
-              background: "linear-gradient(135deg, var(--tomato) 0%, var(--tomato-deep) 100%)",
+              background:
+                "linear-gradient(135deg, var(--tomato) 0%, var(--tomato-deep) 100%)",
               color: "white",
               borderRadius: 16,
               padding: 18,
               textAlign: "center",
             }}
           >
-            <h2 style={{ margin: "0 0 4px", fontSize: 20, color: "var(--cheese)" }}>
+            <h2
+              style={{
+                margin: "0 0 4px",
+                fontSize: 20,
+                color: "var(--cheese)",
+              }}
+            >
               Você ganhou uma pizza! 🎉
             </h2>
-            <p style={{ margin: 0, fontSize: 14, color: "rgba(255,255,255,0.9)" }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 14,
+                color: "rgba(255,255,255,0.9)",
+              }}
+            >
               Escolha o sabor da sua pizza grátis e monte seu pedido.
             </p>
           </div>
         ) : (
           <p style={{ fontSize: 14.5, color: "var(--crust-soft)", margin: 0 }}>
-            Faltam apenas <b style={{ color: "var(--tomato-deep)" }}>{remaining} pizza{remaining === 1 ? "" : "s"}</b>{" "}
+            Faltam apenas{" "}
+            <b style={{ color: "var(--tomato-deep)" }}>
+              {remaining} pizza{remaining === 1 ? "" : "s"}
+            </b>{" "}
             para você ganhar uma pizza grátis 🎁
           </p>
         )}
@@ -166,7 +243,13 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
 
       <div style={{ padding: "22px 20px 40px" }}>
         <h3 style={{ fontSize: 16, margin: "0 0 4px" }}>Nossos sabores</h3>
-        <p style={{ fontSize: 13.5, color: "var(--crust-soft)", margin: "0 0 14px" }}>
+        <p
+          style={{
+            fontSize: 13.5,
+            color: "var(--crust-soft)",
+            margin: "0 0 14px",
+          }}
+        >
           Pizza de tamanho único, entregue no seu apartamento
         </p>
         {FLAVORS.map((f) => (
@@ -181,7 +264,13 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
             }}
           >
             <span>{f.name}</span>
-            <span style={{ color: "var(--tomato-deep)", fontWeight: 600, fontSize: 14 }}>
+            <span
+              style={{
+                color: "var(--tomato-deep)",
+                fontWeight: 600,
+                fontSize: 14,
+              }}
+            >
               {formatMoney(PIZZA_PRICE)}
             </span>
           </div>
@@ -236,25 +325,47 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
 
             {isRewardOrder && (
               <>
-                <p style={{ margin: "-8px 0 14px", color: "var(--crust-soft)", fontSize: 13.5 }}>
+                <p
+                  style={{
+                    margin: "-8px 0 14px",
+                    color: "var(--crust-soft)",
+                    fontSize: 13.5,
+                  }}
+                >
                   Escolha o sabor da sua pizza grátis:
                 </p>
                 {FLAVORS.map((f) => (
                   <label
                     key={f.id}
-                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", fontSize: 15 }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 0",
+                      fontSize: 15,
+                    }}
                   >
                     <input
                       type="radio"
                       name="rewardFlavor"
                       checked={rewardFlavor === f.id}
                       onChange={() => setRewardFlavor(f.id)}
-                      style={{ width: 18, height: 18, accentColor: "var(--tomato)" }}
+                      style={{
+                        width: 18,
+                        height: 18,
+                        accentColor: "var(--tomato)",
+                      }}
                     />
                     {f.name}
                   </label>
                 ))}
-                <p style={{ margin: "16px 0 4px", color: "var(--crust-soft)", fontSize: 13.5 }}>
+                <p
+                  style={{
+                    margin: "16px 0 4px",
+                    color: "var(--crust-soft)",
+                    fontSize: 13.5,
+                  }}
+                >
                   Pizzas adicionais (pagas):
                 </p>
               </>
@@ -272,8 +383,17 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
                 }}
               >
                 <div>
-                  <span style={{ fontSize: 15.5, fontWeight: 500 }}>{f.name}</span>
-                  <span style={{ fontSize: 12.5, color: "var(--crust-soft)", display: "block", marginTop: 2 }}>
+                  <span style={{ fontSize: 15.5, fontWeight: 500 }}>
+                    {f.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 12.5,
+                      color: "var(--crust-soft)",
+                      display: "block",
+                      marginTop: 2,
+                    }}
+                  >
                     {formatMoney(PIZZA_PRICE)} cada
                   </span>
                 </div>
@@ -285,10 +405,20 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
                   >
                     −
                   </button>
-                  <span style={{ minWidth: 18, textAlign: "center", fontWeight: 600, fontSize: 16 }}>
+                  <span
+                    style={{
+                      minWidth: 18,
+                      textAlign: "center",
+                      fontWeight: 600,
+                      fontSize: 16,
+                    }}
+                  >
                     {quantities[f.id]}
                   </span>
-                  <button onClick={() => updateQty(f.id, 1)} style={stepperBtnStyle(false)}>
+                  <button
+                    onClick={() => updateQty(f.id, 1)}
+                    style={stepperBtnStyle(false)}
+                  >
                     +
                   </button>
                 </div>
@@ -308,7 +438,13 @@ export function CustomerCard({ customer, businessPhone, pixKey }: Props) {
               <span style={{ fontSize: 14, color: "var(--crust-soft)" }}>
                 {isRewardOrder ? "Total (pizzas adicionais)" : "Total"}
               </span>
-              <span style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600 }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: 24,
+                  fontWeight: 600,
+                }}
+              >
                 {formatMoney(total)}
               </span>
             </div>
